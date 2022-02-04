@@ -33,7 +33,6 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  int _counter = 0;
   var _users = [];
   String user_found = "NULL";
   var user = {
@@ -44,6 +43,7 @@ class _MyHomePageState extends State<MyHomePage> {
     "country": ""
   };
   var deleted_user_ID;
+  var deleteMsg = "";
   var user_ID;
 
   void getAllUsers() async {
@@ -90,10 +90,11 @@ class _MyHomePageState extends State<MyHomePage> {
     user_ID = value;
   }
 
+  void setDleteMsg(value) {
+    deleteMsg = value;
+  }
+
   void createUser() async {
-    // setState(() {
-    //   _counter++;
-    // });
     var client = new http.Client();
     try {
       var url = Uri.parse('http://127.0.0.1:5000/api/users/add');
@@ -120,10 +121,6 @@ class _MyHomePageState extends State<MyHomePage> {
       );
       print('Response status: ${response.statusCode}');
       print('Response body: ${response.body}');
-
-      // setState(() {
-      //   _users = convert.jsonDecode(response.body) as List;
-      // });
     } finally {
       client.close();
     }
@@ -137,6 +134,10 @@ class _MyHomePageState extends State<MyHomePage> {
       var response = await client.delete(url);
       print('Response status: ${response.statusCode}');
       print('Response body: ${response.body}');
+      setState(() {
+        deleteMsg = response.body;
+      });
+      //setDleteMsg(response.body);
     } finally {
       client.close();
     }
@@ -151,7 +152,10 @@ class _MyHomePageState extends State<MyHomePage> {
       //print('Response status: ${response.statusCode}');
       //print('Response body: ${response.body}');
 
-      user_found = response.body.toString();
+      setState(() {
+        user_found = response.body;
+      });
+
       print(user_found);
     } finally {
       client.close();
@@ -231,7 +235,7 @@ class _MyHomePageState extends State<MyHomePage> {
               onChanged: setPhone,
             ),
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16.0),
+              padding: const EdgeInsets.symmetric(vertical: 6.0),
               child: ElevatedButton(
                   onPressed: () {
                     // Process data.
@@ -239,7 +243,9 @@ class _MyHomePageState extends State<MyHomePage> {
                   },
                   child: const Text("submit")),
             ),
-            const Text("Delete User Form"),
+            Padding(
+                padding: const EdgeInsets.symmetric(vertical: 6.0),
+                child: const Text("Delete User Form")),
             TextFormField(
               decoration: const InputDecoration(
                 hintText: 'Enter user Id',
@@ -252,11 +258,14 @@ class _MyHomePageState extends State<MyHomePage> {
               },
               onChanged: setDeletedUserId,
             ),
-            FloatingActionButton(
-              onPressed: deleteUser,
-              tooltip: 'delete',
-              child: const Text("Delete"),
-            ),
+            Padding(
+                padding: const EdgeInsets.symmetric(vertical: 6.0),
+                child: ElevatedButton(
+                    onPressed: () {
+                      deleteUser();
+                    },
+                    child: const Text("delete"))),
+            Text(deleteMsg),
             const Text("find User By Id Form"),
             TextFormField(
               decoration: const InputDecoration(
@@ -270,16 +279,20 @@ class _MyHomePageState extends State<MyHomePage> {
               },
               onChanged: setUserId,
             ),
-            FloatingActionButton(
-              onPressed: findUserById,
-              tooltip: 'find',
-              child: const Text("find"),
-            ),
-            FloatingActionButton(
-              onPressed: getAllUsers,
-              tooltip: 'Increment',
-              child: const Text("Get All Users"),
-            ),
+            ElevatedButton(
+                onPressed: () {
+                  findUserById();
+                },
+                child: const Text("find User")),
+            Text(user_found),
+            Padding(
+                padding: const EdgeInsets.symmetric(vertical: 6.0),
+                child: ElevatedButton(
+                    onPressed: () {
+                      getAllUsers();
+                    },
+                    child: const Text("Get All Users"))),
+            Text('${_users}')
           ],
         ),
       ),
